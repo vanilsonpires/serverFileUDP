@@ -37,7 +37,7 @@ public class Connection extends Observable implements Observer, AutoCloseable{
 				notifyObservers("Pronto para receber arquivos");
 				
 				while(!isClose && !socket.isClosed()){					
-					ServicoArquivos servidor = null;	
+					ServerFile servidor = null;	
 					Socket cliente = null;
 					
 					try {
@@ -45,7 +45,7 @@ public class Connection extends Observable implements Observer, AutoCloseable{
 						DataInputStream din = new DataInputStream(cliente.getInputStream());
 						String mensagem = din.readUTF();
 						
-						servidor = new ServicoArquivos(ServicoArquivos.PORTA_SERVIDOR, ServicoArquivos.PORTA_ACK, FOLDER_RAIZ+mensagem);
+						servidor = new ServerFile(ServerFile.PORTA_SERVIDOR, ServerFile.PORTA_ACK, FOLDER_RAIZ+mensagem);
 						servidor.addObserver(connection);
 						setChanged();
 						notifyObservers("Se preparando para receber o arquivo: "+mensagem);

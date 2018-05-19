@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Observable;
 
-public class ServicoArquivos extends Observable implements Runnable , AutoCloseable{
+public class ServerFile extends Observable implements Runnable , AutoCloseable{
 
 	public final int CABECALHO = 4;
 	public final int TAMANHO_PACOTE = 1000 + CABECALHO;
@@ -22,7 +22,7 @@ public class ServicoArquivos extends Observable implements Runnable , AutoClosea
 	private DatagramSocket socketEntrada, socketSaida;
 
 	// construtor
-	public ServicoArquivos(int portaEntrada, int portaDestino, String caminho) {
+	public ServerFile(int portaEntrada, int portaDestino, String caminho) {
 		this.portaDestino = portaDestino;
 		this.portaEntrada = portaEntrada;
 		this.caminho = caminho;
