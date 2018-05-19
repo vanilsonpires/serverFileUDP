@@ -173,7 +173,7 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 		}
 	}
 
-	public class ThreadEntrada extends Thread implements AutoCloseable {
+	public class ThreadEntrada extends Thread implements AutoCloseable{
 
 		private DatagramSocket socketEntrada;
 
@@ -230,7 +230,6 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.exit(-1);
 			}
 		}
 		
@@ -245,7 +244,7 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 		proxNumSeq = 0;
 		listaPacotes = new ArrayList<byte[]>(TAMANHO_JANELA);
 		transferenciaCompleta = false;
-		DatagramSocket socketSaida, socketEntrada;
+		DatagramSocket socketSaida = null, socketEntrada = null;
 		semaforo = new Semaphore(1);
 		
 		setChanged();
@@ -266,7 +265,7 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 			e.printStackTrace();
 			setChanged();
 			notifyObservers(e.getMessage());
-		}		
+		}	
 	}
 	
 	public void init() {

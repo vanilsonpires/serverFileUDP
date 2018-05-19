@@ -12,14 +12,14 @@ import java.util.Observable;
 
 public class ServicoArquivos extends Observable implements Runnable , AutoCloseable{
 
-	public static final int CABECALHO = 4;
-	public static final int TAMANHO_PACOTE = 1000 + CABECALHO;
+	public final int CABECALHO = 4;
+	public final int TAMANHO_PACOTE = 1000 + CABECALHO;
 	public static final int PORTA_SERVIDOR = 8002;
 	public static final int PORTA_ACK = 8003;
 	private int portaEntrada;
 	private int portaDestino;
 	private String caminho;
-	DatagramSocket socketEntrada, socketSaida;
+	private DatagramSocket socketEntrada, socketSaida;
 
 	// construtor
 	public ServicoArquivos(int portaEntrada, int portaDestino, String caminho) {

@@ -150,8 +150,13 @@ public class Frame extends JFrame implements Observer {
 
 	// Adiciona um log
 	public void addLog(String msg) {
-		this.jTextAreaLogs
-				.setText(jTextAreaLogs.getText().concat("\n ".concat(getHoraAtual()).concat(" " + msg.trim())));
+		
+		if(jTextAreaLogs.getText().length()>5000){
+			jTextAreaLogs.setText(jTextAreaLogs.getText().substring(5000, jTextAreaLogs.getText().length()));
+			this.jTextAreaLogs.setText(jTextAreaLogs.getText().concat("\n ".concat(getHoraAtual()).concat(" " + msg.trim())));
+		}else{
+			this.jTextAreaLogs.setText(jTextAreaLogs.getText().concat("\n ".concat(getHoraAtual()).concat(" " + msg.trim())));
+		}
 		jTextAreaLogs.setCaretPosition(jTextAreaLogs.getText().length());
 		this.jTextAreaLogs.repaint();
 	}

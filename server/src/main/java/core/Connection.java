@@ -123,6 +123,8 @@ public class Connection extends Observable implements Observer, AutoCloseable{
 	}
 	
 	public void close() throws Exception {
+		if(socket!=null)
+			socket.close();
 		this.isClose = true;	
 	}
 	
