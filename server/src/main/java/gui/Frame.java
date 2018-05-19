@@ -30,7 +30,7 @@ public class Frame extends JFrame implements Observer {
 	private JTextArea jTextAreaLogs;
 	private Connection connection;
 	private JButton onOff;
-	private static final String FOLDER_RAIZ = "C:\\SERVER-FLF\\A.txt";
+	private static final String FOLDER_RAIZ = "C:\\SERVER-FLF\\";
 
 	// Utilitarios
 	private SimpleDateFormat formatHora;

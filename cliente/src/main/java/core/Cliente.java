@@ -48,10 +48,16 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 	}
 	// fim do construtor
 
+	/**
+	 * Representa um temporizador para controlar o tempo máximo de espera por uma resposta do servidor
+	 * @author vanilson
+	 *
+	 */
 	public class Temporizador extends TimerTask {
 
 		public void run() {
 			try {
+				//Tenta adquirir um novo recurso
 				semaforo.acquire();
 				setChanged();
 				notifyObservers("Cliente: Tempo expirado!");
