@@ -18,7 +18,7 @@ import java.util.Observable;
  *
  */
 @SuppressWarnings("serial")
-public class SocketClient extends Observable implements Serializable {
+public class SocketClient extends Observable implements Serializable, AutoCloseable {
 	
 	// Socket usado para a ligação
 	private Socket socket;
@@ -69,12 +69,19 @@ public class SocketClient extends Observable implements Serializable {
 				} catch (EOFException e) {
 					// TODO: handle exception
 				} catch (Exception e) {
-					e.printStackTrace();
-					setChanged();
-					notifyObservers(e.getMessage());
+					if(!e.getMessage().equals("Socket closed"))
+						e.printStackTrace();
 				}
 			}
 		}).start();
+	}
+	
+	/**
+	 * Espera os inputs e outputs estarem prontos
+	 */
+	public void ready(){
+		while(din==null || dout == null)
+			System.out.println("Ainda não está pronto...");
 	}
 
 	public void send(String message){
@@ -129,6 +136,11 @@ public class SocketClient extends Observable implements Serializable {
 	 */
 	public String getUserName() {
 		return userName;
+	}
+
+	public void close() throws Exception {
+		if(socket!=null)
+			socket.close();
 	}
 }
 

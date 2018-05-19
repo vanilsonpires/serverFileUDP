@@ -23,29 +23,31 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import core.Cliente;
+import core.ServerFile;
 import core.SocketClient;;
 
 @SuppressWarnings("serial")
-public class Frame extends JFrame implements Observer{
-	
+public class Frame extends JFrame implements Observer {
+
 	private JPanel panelButton;
 	private JTextArea jTextAreaLogs;
 	private Cliente cliente;
 	private JTextField ipServer;
-	
+
 	// Utilitarios
 	private SimpleDateFormat formatHora;
-	
+
 	public Frame() {
 		super("Cliente File - FLF");
 		try {
-	        this.setLayout(new BorderLayout());
+			this.setLayout(new BorderLayout());
 			this.setMinimumSize(new Dimension(400, 600));
 			this.setMaximumSize(this.getMinimumSize());
 			this.add(panelCenter(), BorderLayout.CENTER);
@@ -58,84 +60,100 @@ public class Frame extends JFrame implements Observer{
 			e.printStackTrace();
 		}
 	}
-	
-    /**
-     * Abre um arquivo selecionado pelo usuário
-     * @author Vanilson Pires
-     * @date 2018-02-26
-     * @return
-     */
-    public File openFile() {
-        JFileChooser chooser = new JFileChooser(new File(System.getProperty("user.home")));
-       
-        int returnVal = chooser.showOpenDialog(this);
 
-        if (returnVal != JFileChooser.APPROVE_OPTION) {
-            // Cancelar
-            return null;
-        }
-     
-        return chooser.getSelectedFile();
-    }
-	
-	private JPanel panelCenter(){
-		
+	/**
+	 * Abre um arquivo selecionado pelo usuário
+	 * 
+	 * @author Vanilson Pires
+	 * @date 2018-02-26
+	 * @return
+	 */
+	public File openFile() {
+		JFileChooser chooser = new JFileChooser(new File(System.getProperty("user.home")));
+
+		int returnVal = chooser.showOpenDialog(this);
+
+		if (returnVal != JFileChooser.APPROVE_OPTION) {
+			// Cancelar
+			return null;
+		}
+
+		return chooser.getSelectedFile();
+	}
+
+	private JPanel panelCenter() {
+
 		JPanel base = new JPanel();
 		base.setLayout(new FlowLayout(FlowLayout.CENTER));
-		
+
 		JPanel jPanel = new JPanel();
 		jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.PAGE_AXIS));
-		
+
 		JLabel jLabel = new JLabel("Digite aqui o ip do servidor:");
 		jLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
 		jPanel.add(jLabel);
 		ipServer = new JTextField();
 		ipServer.setText(getIP());
 		jPanel.add(ipServer);
-		
+
 		JPanel panelCenter = new JPanel();
 		panelCenter.setLayout(new FlowLayout(FlowLayout.CENTER));
-		
+
 		JButton enviarArquivo = new JButton("Enviar arquivo ");
+		final Frame frame = this;
 		enviarArquivo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				//Instância um socket
-				SocketClient socketClient = new SocketClient();
-				
-				//Inicializa o mesmo
-				socketClient.ligar(9999, ipServer.getText());
-				
-				File file = openFile();
-				
-				if(file==null)
-					return;
-				
-				//Avisa o servidor que irá enviar o arquivo..
-				socketClient.send(file.getName());
-				
-				//Envia o arquivo
-				enviarFile(file);
+
+				// Instância um socket
+				SocketClient socketClient = null;
+
+				try {
+					socketClient = new SocketClient();
+					
+					// Inicializa o mesmo
+					socketClient.ligar(9999, ipServer.getText());
+
+					File file = openFile();
+
+					if (file == null)
+						return;
+
+					// Avisa o servidor que irá enviar o arquivo..
+					socketClient.send(file.getName());
+
+					// Envia o arquivo
+					cliente = new Cliente(file, ipServer.getText());
+					cliente.addObserver(frame);
+					cliente.run();
+					
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}finally {
+					if(socketClient!=null)
+						try {
+							socketClient.close();
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+				}
 			}
 		});
 		JButton receberArquivo = new JButton("Receber arquivo");
-		
+		receberArquivo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				solicitarArquivo();
+			}
+		});
+
 		panelCenter.add(enviarArquivo);
 		panelCenter.add(receberArquivo);
-		
+
 		jPanel.add(panelCenter);
-		
+
 		base.add(jPanel);
-		
+
 		return base;
 	}
-	
-	public void enviarFile(File file){
-		cliente = new Cliente(file, ipServer.getText());
-		cliente.addObserver(this);
-		cliente.init();
-	}
-	
 	/**
 	 * Retorna o IP atual da máquina
 	 * 
@@ -175,7 +193,7 @@ public class Frame extends JFrame implements Observer{
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Cria o painel do fundo
 	 * 
@@ -212,17 +230,19 @@ public class Frame extends JFrame implements Observer{
 
 	// Adiciona um log
 	public void addLog(String msg) {
-		
-		if(jTextAreaLogs.getText().length()>5000){
+
+		if (jTextAreaLogs.getText().length() > 5000) {
 			jTextAreaLogs.setText(jTextAreaLogs.getText().substring(5000, jTextAreaLogs.getText().length()));
-			this.jTextAreaLogs.setText(jTextAreaLogs.getText().concat("\n ".concat(getHoraAtual()).concat(" " + msg.trim())));
-		}else{
-			this.jTextAreaLogs.setText(jTextAreaLogs.getText().concat("\n ".concat(getHoraAtual()).concat(" " + msg.trim())));
+			this.jTextAreaLogs
+					.setText(jTextAreaLogs.getText().concat("\n ".concat(getHoraAtual()).concat(" " + msg.trim())));
+		} else {
+			this.jTextAreaLogs
+					.setText(jTextAreaLogs.getText().concat("\n ".concat(getHoraAtual()).concat(" " + msg.trim())));
 		}
 		jTextAreaLogs.setCaretPosition(jTextAreaLogs.getText().length());
 		this.jTextAreaLogs.repaint();
 	}
-	
+
 	/**
 	 * Retorna a data/hora atual formatado
 	 * 
@@ -236,7 +256,52 @@ public class Frame extends JFrame implements Observer{
 	}
 
 	public void update(Observable arg0, Object arg1) {
-		if(arg1!=null)
+		if (arg1 != null)
 			addLog(String.valueOf(arg1));
+	}
+
+	public void solicitarArquivo() {
+		
+		ServerFile serverFile = null;
+		SocketClient socketClient = null;
+
+		try {
+			
+			String nome = JOptionPane.showInputDialog(null, "Digite aqui o nome do arquivo desejado:");
+			JFileChooser chooser = new JFileChooser(new File(System.getProperty("user.home")));
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			chooser.showOpenDialog(this);
+			File file = chooser.getSelectedFile();
+			
+			// Instância um socket
+			socketClient = new SocketClient();
+
+			// Inicializa o mesmo
+			socketClient.ligar(9999, ipServer.getText());
+			
+			//Aguardando o socket estiver pronto
+			socketClient.ready();
+			socketClient.send("GET:file:"+nome+";");
+
+			serverFile = new ServerFile(8084, 8085, file.getAbsolutePath() + "\\"+nome);
+			serverFile.run();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			if(serverFile!=null)
+				try {
+					serverFile.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			if(socketClient!=null)
+				try {
+					socketClient.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+		}
+
 	}
 }

@@ -39,12 +39,12 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 	private ThreadSaida tSaida;
 
 	// construtor
-	public Cliente(File file, String enderecoIp){ 
+	public Cliente(File file, String enderecoIp, int porta){ 
 		if(file!=null)
 			this.caminho = file.getAbsolutePath();
 		this.portaDestino = PORTA_SERVIDOR;
 		this.enderecoIp = enderecoIp;
-		this.portaEntrada = PORTA_ACK;
+		this.portaEntrada = porta;
 	}
 	// fim do construtor
 

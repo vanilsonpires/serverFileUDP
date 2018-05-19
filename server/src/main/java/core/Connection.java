@@ -2,6 +2,7 @@ package core;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -45,26 +46,21 @@ public class Connection extends Observable implements Observer, AutoCloseable{
 						DataInputStream din = new DataInputStream(cliente.getInputStream());
 						String mensagem = din.readUTF();
 						
-						servidor = new ServerFile(ServerFile.PORTA_SERVIDOR, ServerFile.PORTA_ACK, FOLDER_RAIZ+mensagem);
-						servidor.addObserver(connection);
-						setChanged();
-						notifyObservers("Se preparando para receber o arquivo: "+mensagem);
-						servidor.run();		
-						
+						if(mensagem.contains("GET:")){
+							
+							String ip = cliente.getInetAddress().getHostAddress();
+							String nomeArquivo = mensagem.substring(mensagem.indexOf("file:")+"file:".length(), mensagem.indexOf(";"));
+							sendFile(ip, Integer.valueOf(porta), nomeArquivo);
+							
+						}else{
+							servidor = new ServerFile(ServerFile.PORTA_SERVIDOR, ServerFile.PORTA_ACK, FOLDER_RAIZ+mensagem);
+							servidor.addObserver(connection);
+							setChanged();
+							notifyObservers("Se preparando para receber o arquivo: "+mensagem);
+							servidor.run();		
+						}						
 					} catch (Exception e) {
-						DataOutputStream dataOutputStream = null;
-						try {
-							dataOutputStream = new DataOutputStream(cliente.getOutputStream());
-							dataOutputStream.writeUTF("ERROR");
-						} catch (Exception e2) {
-							e2.printStackTrace();
-						}finally {
-							try {
-								dataOutputStream.close();
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-						}
+						e.printStackTrace();
 					}finally {
 						if(servidor!=null)
 							try {
@@ -128,4 +124,69 @@ public class Connection extends Observable implements Observer, AutoCloseable{
 		this.isClose = true;	
 	}
 	
+	/**
+	 * Envia um determinado arquivo
+	 * @param ip
+	 * @param porta
+	 * @param nomeArquivo
+	 * @return
+	 */
+	public boolean sendFile(String ip, int porta, String nomeArquivo){
+
+		Cliente cliente = null;
+		
+		try {
+			File file = pesquisar(nomeArquivo, new File(FOLDER_RAIZ));
+			
+			if(file==null)
+				return false;
+		
+			cliente = new Cliente(file, ip, porta);
+			cliente.run();
+			
+			return true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			if(cliente!=null)
+				try {
+					cliente.close();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+		}
+		return false;
+	}
+	
+	/**
+	 * Realiza a pesquisa de um arquivo apartir de uma pasta raiz
+	 * @param name
+	 * @param folderRaiz
+	 * @return
+	 */
+	public static File pesquisar(String name, File folderRaiz){
+		
+		if(folderRaiz.getName().equalsIgnoreCase(name)){
+			return folderRaiz;
+		}				
+		
+		if(folderRaiz.isDirectory()){
+			for (File f : folderRaiz.listFiles()) {
+				
+				if(f.getName().equalsIgnoreCase(name)){
+					return f;
+				}						
+				
+				if(f.isDirectory()){						
+					File aux = pesquisar(name, f);
+					
+					if(aux!=null && aux.getName().equalsIgnoreCase(name)){
+						return aux;
+					}							
+				}						
+			}
+		}			
+		return null;			
+	}
 }
