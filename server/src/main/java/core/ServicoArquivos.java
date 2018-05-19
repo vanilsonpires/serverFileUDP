@@ -9,9 +9,8 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Observable;
-import java.util.concurrent.Executors;
 
-public class Servidor extends Observable implements Runnable , AutoCloseable{
+public class ServicoArquivos extends Observable implements Runnable , AutoCloseable{
 
 	public static final int CABECALHO = 4;
 	public static final int TAMANHO_PACOTE = 1000 + CABECALHO;
@@ -23,7 +22,7 @@ public class Servidor extends Observable implements Runnable , AutoCloseable{
 	DatagramSocket socketEntrada, socketSaida;
 
 	// construtor
-	public Servidor(int portaEntrada, int portaDestino, String caminho) {
+	public ServicoArquivos(int portaEntrada, int portaDestino, String caminho) {
 		this.portaDestino = portaDestino;
 		this.portaEntrada = portaEntrada;
 		this.caminho = caminho;
@@ -44,7 +43,7 @@ public class Servidor extends Observable implements Runnable , AutoCloseable{
 			socketSaida = new DatagramSocket();
 			
 			setChanged();
-			notifyObservers("Servidor Conectado...");
+			notifyObservers("Servidor conectado...");
 			
 			try {
 				byte[] recebeDados = new byte[TAMANHO_PACOTE];
@@ -126,10 +125,6 @@ public class Servidor extends Observable implements Runnable , AutoCloseable{
 		} catch (SocketException e1) {
 			e1.printStackTrace();
 		}
-	}
-
-	public void init() {
-		Executors.newSingleThreadExecutor().execute(this);
 	}
 
 	// gerar pacote de ACK

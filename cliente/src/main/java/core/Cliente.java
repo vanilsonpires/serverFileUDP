@@ -39,8 +39,9 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 	private ThreadSaida tSaida;
 
 	// construtor
-	public Cliente(String caminho, String enderecoIp) {
-		this.caminho = caminho;
+	public Cliente(File file, String enderecoIp){ 
+		if(file!=null)
+			this.caminho = file.getAbsolutePath();
 		this.portaDestino = PORTA_SERVIDOR;
 		this.enderecoIp = enderecoIp;
 		this.portaEntrada = PORTA_ACK;
@@ -97,6 +98,13 @@ public class Cliente extends Observable implements Runnable, AutoCloseable{
 
 		public void run() {
 			try {
+				
+				if(caminho==null){
+					setChanged();
+					notifyObservers("Arquivo não selecionado. Operação cancelada");
+					return;
+				}	
+				
 				FileInputStream fis = new FileInputStream(new File(caminho));
 
 				try {
